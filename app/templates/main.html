@@ -1,0 +1,75 @@
+{% extends "/shared/_base.html" %}
+
+{% block content %}
+<section class="w-full max-w-4xl mx-auto">
+    <div class="flex flex-col w-full justify-center">
+        <div class="mx-auto max-w-lg text-center my-8">
+            <h2 class="text-3xl font-bold sm:text-4xl text-black dark:text-white">VIVIDUS</h2>
+
+            <p class="mt-4 text-gray-300">
+                Upload a video and select one of the models to test whether the inference categorizes the video as
+                violent or non-violent.
+            </p>
+        </div>
+        <form hx-encoding='multipart/form-data' hx-post='/upload'
+            _='on htmx:xhr:progress(loaded, total) set #progress.value to (loaded/total)*100'>
+            <div class="flex-grow grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-8 my-8">
+
+                <div class="h-full rounded-lg lg:col-span-2">
+
+                    <div class="flex items-center justify-center w-full">
+                        <label for="dropzone-file"
+                            class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
+                            <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                <svg class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true"
+                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2" />
+                                </svg>
+                                <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span
+                                        class="font-semibold">Click
+                                        to upload</span> or drag and drop</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">MP4, AVI, MOV or WMV (MAX. 800x400px
+                                    5
+                                    min)
+                                </p>
+                            </div>
+                            <input id="dropzone-file" type="file" name="file" />
+                        </label>
+                    </div>
+                </div>
+                <div class="h-full rounded-lg">
+                    <fieldset class="space-y-4">
+                        <legend class="sr-only">Delivery</legend>
+
+                        <div>
+                            <input type="radio" name="ModelOption" value="DecisionTree" id="DecisionTree"
+                                class="peer hidden" checked />
+
+                            <label for="DecisionTree"
+                                class="flex cursor-pointer items-center justify-between rounded-lg border border-gray-100 p-4 text-sm font-medium shadow-sm hover:border-gray-200 peer-checked:border-blue-500 peer-checked:ring-1 peer-checked:ring-blue-500 dark:border-gray-800 dark:hover:border-gray-700">
+                                <p class="text-gray-700 dark:text-gray-200">Decision tree</p>
+                            </label>
+                        </div>
+
+                        <div>
+                            <input type="radio" name="ModelOption" value="HyperVD" id="HyperVD"
+                                class="peer hidden" />
+
+                            <label for="HyperVD"
+                                class="flex cursor-pointer items-center justify-between rounded-lg border border-gray-100 p-4 text-sm font-medium shadow-sm hover:border-gray-200 peer-checked:border-blue-500 peer-checked:ring-1 peer-checked:ring-blue-500 dark:border-gray-800 dark:hover:border-gray-700">
+                                <p class="text-gray-700 dark:text-gray-200">HyperVD</p>
+                            </label>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+            <button>
+                Upload
+            </button>
+            <progress id='progress' value='0' max='100'></progress>
+        </form>
+    </div>
+</section>
+{% endblock %}
