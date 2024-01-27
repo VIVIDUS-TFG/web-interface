@@ -1,0 +1,40 @@
+version: '3.4'
+
+services:
+  web:
+    restart: always
+    container_name: vividus_web
+    image: vividus_web:latest
+    build:
+      context: ./web
+    ports:
+      - "8000:8000"
+    networks:
+      - vividus
+    volumes:
+      - videos_dir:/videos_dir
+      - features_dir:/features_dir
+    depends_on:
+      - feature_extractor
+
+  feature_extractor:
+    restart: always
+    container_name: vividus_features
+    image: vividus_features:latest
+    build:
+      context: ./feature_extractor
+    ports:
+      - "8001:8000"
+    networks:
+      - vividus
+    volumes:
+      - videos_dir:/videos_dir
+      - features_dir:/features_dir
+
+networks:
+  vividus:
+    driver: bridge
+    
+volumes:
+  videos_dir:
+  features_dir:
