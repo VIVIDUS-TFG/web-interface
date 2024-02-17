@@ -1,7 +1,7 @@
 {% extends "/shared/_base.html" %}
 
 {% block content %}
-<section class="w-full max-w-4xl mx-auto">
+<section id="content" class="w-full max-w-4xl mx-auto">
     <div class="flex flex-col w-full justify-center">
         <div class="mx-auto max-w-lg text-center my-8">
             <h2 class="text-3xl font-bold sm:text-4xl text-black dark:text-white">VIVIDUS</h2>
@@ -11,8 +11,7 @@
                 violent or non-violent.
             </p>
         </div>
-        <form hx-encoding='multipart/form-data' hx-post='/upload'
-            _='on htmx:xhr:progress(loaded, total) set #progress.value to (loaded/total)*100'>
+        <form hx-encoding='multipart/form-data' hx-post='/upload' enctype="multipart/form-data">
             <div class="flex-grow grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-8 my-8">
 
                 <div class="h-full rounded-lg lg:col-span-2">
@@ -20,6 +19,7 @@
                     <div class="flex items-center justify-center w-full">
                         <label for="dropzone-file"
                             class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
+                            <div id="droparea">
                             <div class="flex flex-col items-center justify-center pt-5 pb-6">
                                 <svg class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true"
                                     xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
@@ -30,46 +30,56 @@
                                 <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span
                                         class="font-semibold">Click
                                         to upload</span> or drag and drop</p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">MP4, AVI, MOV or WMV (MAX. 800x400px
-                                    5
-                                    min)
+                                <p class="text-xs text-gray-500 dark:text-gray-400">MP4 (too large videos can result in very long response times)
                                 </p>
                             </div>
-                            <input id="dropzone-file" type="file" name="file" />
+                            <input id="dropzone-file" type="file" name="file" accept="video/mp4" hidden/>
+                            </div>
+                            <video id="videoPreview" class="absolute top-0 left-0 w-full h-full hidden" style="object-fit: cover;" controls></video>
                         </label>
                     </div>
                 </div>
                 <div class="h-full rounded-lg">
                     <fieldset class="space-y-4">
-                        <legend class="sr-only">Delivery</legend>
-
+                        <legend class="sr-only">Model</legend>
+                        {% for model in model_names %}
                         <div>
-                            <input type="radio" name="ModelOption" value="DecisionTree" id="DecisionTree"
-                                class="peer hidden" checked />
-
-                            <label for="DecisionTree"
-                                class="flex cursor-pointer items-center justify-between rounded-lg border border-gray-100 p-4 text-sm font-medium shadow-sm hover:border-gray-200 peer-checked:border-blue-500 peer-checked:ring-1 peer-checked:ring-blue-500 dark:border-gray-800 dark:hover:border-gray-700">
-                                <p class="text-gray-700 dark:text-gray-200">Decision tree</p>
-                            </label>
-                        </div>
-
-                        <div>
-                            <input type="radio" name="ModelOption" value="HyperVD" id="HyperVD"
+                            <input type="checkbox" name="options" value="{{ model }}" id="{{ model }}"
                                 class="peer hidden" />
 
-                            <label for="HyperVD"
+                            <label for="{{ model }}"
                                 class="flex cursor-pointer items-center justify-between rounded-lg border border-gray-100 p-4 text-sm font-medium shadow-sm hover:border-gray-200 peer-checked:border-blue-500 peer-checked:ring-1 peer-checked:ring-blue-500 dark:border-gray-800 dark:hover:border-gray-700">
-                                <p class="text-gray-700 dark:text-gray-200">HyperVD</p>
+                                <p class="text-gray-700 dark:text-gray-200">{{ model }}</p>
                             </label>
                         </div>
+                        {% endfor %}
                     </fieldset>
                 </div>
             </div>
             <button>
                 Upload
             </button>
-            <progress id='progress' value='0' max='100'></progress>
         </form>
     </div>
 </section>
+
+<script>
+    document.getElementById('dropzone-file').addEventListener('change', function() {
+        if (this.files && this.files[0]) {
+            var reader = new FileReader();
+            
+            reader.onload = function(e) {
+                var videoPreview = document.getElementById('videoPreview');
+                var dropArea = document.getElementById('droparea')
+                videoPreview.src = e.target.result;
+                dropArea.classList.add('hidden')
+                videoPreview.classList.remove('hidden'); // Show the video
+                // videoPreview.play(); // Auto-play the video
+            };
+            
+            reader.readAsDataURL(this.files[0]);
+        }
+    });
+</script>
+
 {% endblock %}

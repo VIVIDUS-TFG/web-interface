@@ -6,7 +6,9 @@ services:
     container_name: vividus_web
     image: vividus_web:latest
     build:
-      context: ./web
+      context: ../
+      dockerfile: docker/web/Dockerfile
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
     ports:
       - "8000:8000"
     networks:
@@ -17,18 +19,62 @@ services:
     depends_on:
       - feature_extractor
 
+  redis:
+    container_name: vividus_redis
+    image: redis:7.2.4
+    networks:
+      - vividus
+
+  worker:
+    container_name: vividus_worker
+    image: vividus_worker:latest
+    build:
+      context: ../
+      dockerfile: docker/web/Dockerfile
+    command: python -m celery -A app worker
+    depends_on:
+      - redis
+      - web
+    stdin_open: true
+    networks:
+      - vividus
+
+  flower:
+    image: mher/flower
+    container_name: flower
+    command: celery flower # This will execute flower.
+    environment:
+      - CELERY_BROKER_URL=redis://vividus_redis:6379/0
+      - FLOWER_PORT=8888
+    ports:
+      - 8888:8888 # docker will expose this ports for flower
+    depends_on:
+      - worker
+      - redis
+    networks:
+      - vividus
+
   feature_extractor:
     restart: always
     container_name: vividus_features
     image: vividus_features:latest
     build:
       context: ./feature_extractor
-    ports:
-      - "8001:8000"
     networks:
       - vividus
     volumes:
       - videos_dir:/videos_dir
+      - features_dir:/features_dir
+
+  model_hypervd:
+    restart: always
+    container_name: vividus_models_hypervd
+    image: vividus_models_hypervd:latest
+    build:
+      context: ./models/hyperVD
+    networks:
+      - vividus
+    volumes:
       - features_dir:/features_dir
 
 networks:
@@ -37,4 +83,10 @@ networks:
     
 volumes:
   videos_dir:
+    # driver: local
   features_dir:
+    # driver: local
+    # driver_opts:
+    #   type: none
+    #   device: ./features_dir
+    #   o: bind

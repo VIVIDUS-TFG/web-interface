@@ -7,13 +7,17 @@ from typing import Any
 
 APP_DIR = Path(__file__).resolve().parent
 
-
 class Settings(BaseSettings):
 
     APP_DIR: Path = APP_DIR
 
     STATIC_DIR: Path = APP_DIR / 'static'
     TEMPLATE_DIR: Path = APP_DIR / 'templates'
+
+    MODELS_CONFIG: Path = APP_DIR / 'config' / 'models_config.yml'
+
+    VIDEOS_DIR: Path = APP_DIR / 'videos_dir'
+    FEATURES_DIR: Path = APP_DIR / 'features_dir'
 
     FASTAPI_PROPERTIES: dict[str, Any] = {
         "title": "VIVIDUS Configurator",

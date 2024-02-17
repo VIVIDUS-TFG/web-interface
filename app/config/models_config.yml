@@ -1,0 +1,4 @@
+models:
+  - name: hypervd
+    types: [MIX]
+    args: {}

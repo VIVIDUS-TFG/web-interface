@@ -1,0 +1,27 @@
+<p>loading</p>
+
+<script>
+    const taskId = "{{ task_id }}";
+    
+    var ws = new WebSocket(`ws://localhost:8000/ws/${taskId}`);
+    ws.onopen = function(event) {
+    console.log("WebSocket connection established");
+    };
+
+    ws.onmessage = function(event) {
+        console.log("Message received:", event.data);
+        var data = JSON.parse(event.data);
+        if (data.status === 'completed') {
+            ws.close();
+            window.location.href = `/results?task_id=${data.task_id}`; // Redirect to the results page
+        }
+    };
+
+    ws.onerror = function(event) {
+        console.error("WebSocket error observed:", event);
+    };
+
+    ws.onclose = function(event) {
+        console.log("WebSocket connection closed");
+    };
+</script>
