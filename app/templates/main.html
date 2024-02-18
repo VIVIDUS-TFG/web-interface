@@ -11,7 +11,7 @@
                 violent or non-violent.
             </p>
         </div>
-        <form hx-encoding='multipart/form-data' hx-post='/upload' enctype="multipart/form-data">
+        <form hx-encoding='multipart/form-data' hx-post='/upload' enctype="multipart/form-data" hx-target="this" hx-swap="outerHTML">
             <div class="flex-grow grid grid-cols-1 gap-4 lg:grid-cols-3 lg:gap-8 my-8">
 
                 <div class="h-full rounded-lg lg:col-span-2">
@@ -56,7 +56,7 @@
                     </fieldset>
                 </div>
             </div>
-            <button>
+            <button class="text-gray-300">
                 Upload
             </button>
         </form>

@@ -24,7 +24,6 @@ from app.models import Model
 from app.utils import mount_models, check_service_health
 from app.tasks import create_task_signatures, extract_features, notify_task_completion
 
-from app.signals import websocket_connections
 
 settings = Settings()
 templates = Jinja2Templates(directory=settings.TEMPLATE_DIR)
@@ -68,7 +67,7 @@ async def upload_file(request: Request, response: Response, file: UploadFile = F
 
     try:
         with open(video_path, "wb") as buffer:
-            while data := await file.read(1024):  # Read chunks of 1024 bytes
+            while data := await file.read(1024):
                 buffer.write(data)
     except Exception as e:
         raise HTTPException(
@@ -100,27 +99,19 @@ async def websocket_endpoint(websocket: WebSocket, task_id: str):
     pubsub = redis.pubsub()
     await pubsub.subscribe('task_updates')
     try:
-        # Listen for messages
         async for message in pubsub.listen():
-            # Check if the message is of type 'message' which indicates it's a published message
             if message['type'] == 'message':
-                # Attempt to parse the JSON message data
                 try:
                     data = json.loads(message['data'])
                 except json.JSONDecodeError:
-                    # If message is not a valid JSON, ignore and continue
                     continue
 
-                # Check if the task_id in the message matches the task_id we're looking for
                 if data.get('task_id') == task_id:
-                    # If it matches, send the JSON data to the WebSocket client
                     await websocket.send_json({"status": "completed", "task_id": task_id})
-                    # Optionally break or continue listening based on your use case
                     break
     except Exception as e:
         print(f"An error occurred: {e}")
     finally:
-        # Cleanup: Unsubscribe and close connections
         await pubsub.unsubscribe('task_updates')
         await redis.close()
         await websocket.close()
@@ -131,8 +122,8 @@ def results(request: Request, task_id: str = Query(...)):
     print(f"Task ID: {task_id}, State: {task_result.state}")
     if task_result.ready():
         if task_result.successful():
-            result_data = task_result.get(timeout=1.0)
-            return templates.TemplateResponse("main.html", {"request": request})
+            result_data = task_result.get()
+            return templates.TemplateResponse("results.html", {"request": request, "result": result_data})
         else:
             raise HTTPException(status_code=HTTP_400_BAD_REQUEST, detail="Task failed")
     else:

@@ -8,10 +8,6 @@ import requests
 from typing import List
 from .celery import app
 
-from celery.signals import task_success
-
-from app.signals import websocket_connections
-
 redis_client = redis.Redis(host='vividus_redis', port=6379, db=2)
 
 def publish_task_completion(task_id):
@@ -50,9 +46,8 @@ def classify_video(parent_result: bool, payload: dict, endpoint_url: str):
         raise e
     
 @app.task(bind=True)
-def notify_task_completion(self, *args, **kwargs):
-    # Extract the original task_id if needed from args or kwargs
-    # For demonstration, assuming task_id is directly available
+def notify_task_completion(self, parent_result: dict):
     task_id = self.request.id
     publish_task_completion(task_id)
+    return parent_result
 
